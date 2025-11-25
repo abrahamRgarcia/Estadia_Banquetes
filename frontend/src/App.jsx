@@ -35,6 +35,7 @@ import Notifications from "./pages/Notifications";
 import BackupPage from "./pages/BackupPage";
 import Invitaciones from "./pages/Invitaciones";
 import InvitacionBoda from "./pages/InvitacionBoda";
+import HomeConfig from "./pages/HomeConfig";
 
 function Logout() {
   localStorage.clear();
@@ -126,7 +127,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
           path="/inventory/cubierto"
           element={
@@ -200,7 +201,7 @@ function App() {
           }
         />
         {/* Rutas para Eventos */}
-        <Route 
+        <Route
           path="/inventory/eventos"
           element={
             <ProtectedRoute>
@@ -208,7 +209,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
+        <Route
           path="/inventory/eventos/new"
           element={
             <ProtectedRoute>
@@ -216,7 +217,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
+        <Route
           path="/inventory/eventos/:id"
           element={
             <ProtectedRoute>
@@ -225,7 +226,7 @@ function App() {
           }
         />
         {/* Rutas para Degustaciones */}
-        <Route 
+        <Route
           path="/inventory/degustaciones"
           element={
             <ProtectedRoute>
@@ -233,7 +234,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
+        <Route
           path="/inventory/degustaciones/new"
           element={
             <ProtectedRoute>
@@ -241,7 +242,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
+        <Route
           path="/inventory/degustaciones/:id"
           element={
             <ProtectedRoute>
@@ -318,6 +319,14 @@ function App() {
           element={
             <ProtectedRoute>
               <InvitacionBoda />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/home-config"
+          element={
+            <ProtectedRoute>
+              <HomeConfig />
             </ProtectedRoute>
           }
         />

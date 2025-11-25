@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
-    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification
+    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification,
+    HomeSection, HomeSectionImage
 )
 from django.contrib.contenttypes.models import ContentType
 
@@ -153,3 +154,15 @@ class CalendarActivitySerializer(serializers.Serializer):
     end = serializers.DateTimeField()
     type = serializers.CharField()
     details = serializers.DictField()
+
+class HomeSectionImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HomeSectionImage
+        fields = ['id', 'image', 'caption', 'order']
+
+class HomeSectionSerializer(serializers.ModelSerializer):
+    images = HomeSectionImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = HomeSection
+        fields = ['id', 'name', 'title', 'description', 'extra_text', 'images']

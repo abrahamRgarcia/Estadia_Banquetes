@@ -1,0 +1,145 @@
+.config-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.config-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    gap: 0.5rem;
+    border-right: 1px solid #eee;
+    padding-right: 1rem;
+}
+
+.config-tab {
+    padding: 10px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #666;
+}
+
+.config-tab:hover {
+    background-color: #f5f5f5;
+}
+
+.config-tab.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.config-content {
+    flex: 1;
+}
+
+.config-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input, .form-group textarea {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.save-btn {
+    align-self: flex-start;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.save-btn:hover {
+    background-color: #43a047;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.image-card {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 1;
+}
+
+.image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-card {
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    cursor: pointer;
+}
+
+.upload-card:hover {
+    border-color: #1976d2;
+    background-color: #f0f7ff;
+}
+
+.upload-label {
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

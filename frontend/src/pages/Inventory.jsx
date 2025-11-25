@@ -4,25 +4,26 @@ import { jwtDecode } from 'jwt-decode';
 import { ACCESS_TOKEN } from '../constants';
 import NavbarInventory from '../components/NavbarInventory';
 import '../styles/Inventory.css';
-import { 
-    LayoutGrid, Users, Warehouse, GlassWater, Calendar, 
-    ClipboardList, Utensils, Box, Settings, BarChart, 
-    Mail, FileText, Building, UsersRound, Star, Tent, 
-    ClipboardPlus, HandPlatter, Palmtree, Speaker, CakeSlice 
+import {
+  LayoutGrid, Users, Warehouse, GlassWater, Calendar,
+  ClipboardList, Utensils, Box, Settings, BarChart,
+  Mail, FileText, Building, UsersRound, Star, Tent,
+  ClipboardPlus, HandPlatter, Palmtree, Speaker, CakeSlice
 } from 'lucide-react';
 
 // Estructura de datos para las tarjetas de acción
 const actionItems = [
-    { to: "/inventory/eventos", icon: Calendar, label: "Eventos" },
-    { to: "/inventory/clientes", icon: Users, label: "Clientes" },
-    { to: "/inventory/products", icon: LayoutGrid, label: "Productos" },
-    { to: "/inventory/items", icon: Box, label: "Inventario" },
-    { to: "/inventory/bodegas", icon: Warehouse, label: "Bodegas" },
-    { to: "/inventory/degustaciones", icon: HandPlatter, label: "Degustaciones" },
-    { to: "/inventory/tipos-evento", icon: Star, label: "Tipos de Evento" },
-    { to: "/inventory/users", icon: UsersRound, label: "Usuarios" },
-    { to: "/inventory/reports", icon: BarChart, label: "Reportes" },
-    { to: "/inventory/backup", icon: FileText, label: "Respaldos" },
+  { to: "/inventory/eventos", icon: Calendar, label: "Eventos" },
+  { to: "/inventory/clientes", icon: Users, label: "Clientes" },
+  { to: "/inventory/products", icon: LayoutGrid, label: "Productos" },
+  { to: "/inventory/items", icon: Box, label: "Inventario" },
+  { to: "/inventory/bodegas", icon: Warehouse, label: "Bodegas" },
+  { to: "/inventory/degustaciones", icon: HandPlatter, label: "Degustaciones" },
+  { to: "/inventory/tipos-evento", icon: Star, label: "Tipos de Evento" },
+  { to: "/inventory/users", icon: UsersRound, label: "Usuarios" },
+  { to: "/inventory/reports", icon: BarChart, label: "Reportes" },
+  { to: "/inventory/backup", icon: FileText, label: "Respaldos" },
+  { to: "/inventory/home-config", icon: LayoutGrid, label: "Página de Inicio" },
 ];
 
 const Inventory = () => {
@@ -33,7 +34,7 @@ const Inventory = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUsername(decoded.username); 
+        setUsername(decoded.username);
       } catch (error) {
         console.error("Error decoding token:", error);
       }

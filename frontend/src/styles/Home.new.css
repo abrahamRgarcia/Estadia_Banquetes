@@ -4,6 +4,8 @@ body {
   padding: 0;
   font-family: 'Montserrat', sans-serif;
   color: #FFFFFF;
+  background-color: #000;
+  /* Fondo negro general */
 }
 
 /* Estilos para la sección Hero */
@@ -14,7 +16,8 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding-top: 80px; /* Para compensar la Navbar fija */
+  padding-top: 80px;
+  /* Para compensar la Navbar fija */
 }
 
 /* Número de referencia "01" */
@@ -55,15 +58,142 @@ body {
   color: #FFFFFF;
 }
 
+/* --- SECCIÓN SOBRE NOSOTROS --- */
+.about-section {
+  padding: 60px 20px;
+  background-color: #000;
+  color: #fff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2rem;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.about-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+  /* Alineación superior */
+}
+
+.about-image {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  /* Limitar ancho máximo de la imagen */
+}
+
+.about-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+  object-fit: cover;
+  max-height: 400px;
+  /* Limitar altura máxima */
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 300px;
+  background-color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #444;
+  color: #888;
+}
+
+.about-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.about-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.about-features-text p {
+  margin: 10px 0;
+  padding-left: 15px;
+  border-left: 2px solid #fff;
+}
+
+/* --- SECCIÓN SOCIALES / CORPORATIVOS / ETC --- */
+.social-section,
+.corporate-section,
+.government-section,
+.dressing-room-section,
+.additional-section {
+  padding: 60px 20px;
+  background-color: #000;
+  /* O alternar colores si se desea */
+}
+
+.social-grid,
+.corporate-grid,
+.government-grid,
+.dressing-room-grid,
+.additional-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.grid-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: transform 0.3s ease;
+}
+
+.grid-image:hover {
+  transform: scale(1.02);
+}
+
+.social-item-title,
+.corporate-item-title,
+.government-item-title {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  text-align: center;
+  color: #ccc;
+}
+
 /* Media Queries para responsividad */
 @media (max-width: 768px) {
   .hero-content h1 {
     font-size: 14px;
     letter-spacing: 4px;
   }
-  
+
   .hero-content .brand-name {
     font-size: 80px;
+  }
+
+  .about-content {
+    flex-direction: column;
+  }
+
+  .about-image,
+  .about-text {
+    width: 100%;
+    max-width: 100%;
   }
 }
 

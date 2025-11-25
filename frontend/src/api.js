@@ -20,4 +20,13 @@ api.interceptors.request.use(
   }
 );
 
+export const getHomeSections = () => api.get("api/inventory/home-sections/");
+export const updateHomeSection = (name, data) => api.patch(`api/inventory/home-sections/${name}/`, data);
+export const uploadHomeSectionImage = (name, formData) =>
+  api.post(`api/inventory/home-sections/${name}/upload_image/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+export const deleteHomeSectionImage = (name, imageId) =>
+  api.post(`api/inventory/home-sections/${name}/delete_image/`, { image_id: imageId });
+
 export default api;

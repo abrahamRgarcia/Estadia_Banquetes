@@ -323,3 +323,33 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.message
+
+class HomeSection(models.Model):
+    SECTION_CHOICES = [
+        ('about', 'Sobre Nosotros'),
+        ('social', 'Sociales'),
+        ('corporate', 'Corporativos'),
+        ('government', 'Gubernamentales'),
+        ('camerinos', 'Camerinos'),
+        ('adicionales', 'Adicionales'),
+    ]
+
+    name = models.CharField(max_length=50, choices=SECTION_CHOICES, unique=True)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    extra_text = models.TextField(blank=True, null=True, help_text="Texto adicional, listas, etc.")
+    
+    def __str__(self):
+        return self.get_name_display()
+
+class HomeSectionImage(models.Model):
+    section = models.ForeignKey(HomeSection, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='home_images/')
+    caption = models.CharField(max_length=200, blank=True, null=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Image for {self.section.name} - {self.caption or 'No caption'}"

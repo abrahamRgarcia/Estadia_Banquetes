@@ -5,7 +5,8 @@ from .views import (
     CristaleriaViewSet, SillaViewSet, MesaViewSet, SalaLoungeViewSet, PeriqueraViewSet, CarpaViewSet, 
     PistaTarimaViewSet, ExtraViewSet, EventoViewSet, ContentTypeViewSet, DegustacionViewSet, ProductViewSet, 
     CalendarDataAPIView, NotificationViewSet, InventoryUsageReportView, BackupCreateView, BackupRestoreView,
-    LowStockInventoryView, WarehouseInventoryReportView, MaintenanceReportView, EventAnalysisReportView
+    LowStockInventoryView, WarehouseInventoryReportView, MaintenanceReportView, EventAnalysisReportView,
+    HomeSectionViewSet
 )
 
 router = DefaultRouter()
@@ -28,6 +29,7 @@ router.register(r'degustaciones', DegustacionViewSet, basename='degustacion')
 router.register(r'content-types', ContentTypeViewSet, basename='content-type')
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'notifications', NotificationViewSet, basename='notification')
+router.register(r'home-sections', HomeSectionViewSet, basename='home-section')
 
 urlpatterns = [
     # 1. OTRAS RUTAS PERSONALIZADAS

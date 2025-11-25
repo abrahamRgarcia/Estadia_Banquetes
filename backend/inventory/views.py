@@ -3,20 +3,23 @@ import shutil
 from rest_framework import serializers, viewsets, filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from django.conf import settings
 from django.http import FileResponse, Http404, HttpResponse # Combinamos HttpResponse aquí
 from django.db import connection, transaction, models
+from django.contrib.contenttypes.models import ContentType
 
 # Importaciones de Modelos y Serializadores (Se mantienen al final)
 from .models import (
     TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
-    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification
+    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification, HomeSection, HomeSectionImage
 )
 from .serializers import (
     TipoEventoSerializer, BodegaSerializer, ClienteSerializer, ManteleriaSerializer, CubiertoSerializer, 
     LozaSerializer, CristaleriaSerializer, SillaSerializer, MesaSerializer, SalaLoungeSerializer, 
     PeriqueraSerializer, CarpaSerializer, PistaTarimaSerializer, ExtraSerializer, EventoSerializer, DegustacionSerializer,
-    ProductSerializer, CalendarActivitySerializer, NotificationSerializer
+    ProductSerializer, CalendarActivitySerializer, NotificationSerializer, HomeSectionSerializer, HomeSectionImageSerializer
 )
 
 # 💡 Importación ÚNICA Y CORRECTA de datetime
@@ -31,23 +34,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 import openpyxl 
+
 from openpyxl.styles import Font, Alignment
-
-from django.contrib.contenttypes.models import ContentType
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-
-# Importaciones de Modelos y Serializadores (Se mantienen al final)
-from .models import (
-    TipoEvento, Bodega, Cliente, Manteleria, Cubierto, Loza, Cristaleria, Silla, Mesa, SalaLounge, 
-    Periquera, Carpa, PistaTarima, Extra, Evento, EventoMobiliario, Degustacion, DegustacionMobiliario, Product, Notification
-)
-from .serializers import (
-    TipoEventoSerializer, BodegaSerializer, ClienteSerializer, ManteleriaSerializer, CubiertoSerializer, 
-    LozaSerializer, CristaleriaSerializer, SillaSerializer, MesaSerializer, SalaLoungeSerializer, 
-    PeriqueraSerializer, CarpaSerializer, PistaTarimaSerializer, ExtraSerializer, EventoSerializer, DegustacionSerializer,
-    ProductSerializer, CalendarActivitySerializer, NotificationSerializer
-)
 
 class TipoEventoViewSet(viewsets.ModelViewSet):
     queryset = TipoEvento.objects.all()
@@ -300,7 +288,18 @@ class DegustacionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('mobiliario_asignado__content_object')
+        queryset = super().get_queryset().prefetch_related('mobiliario_asignado__content_object')
+        
+        # Filtering by year and month
+        year = self.request.query_params.get('year')
+        month = self.request.query_params.get('month')
+        
+        if year:
+            queryset = queryset.filter(fecha_degustacion__year=year)
+        if month:
+            queryset = queryset.filter(fecha_degustacion__month=month)
+            
+        return queryset
 
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -1051,6 +1050,151 @@ class WarehouseInventoryReportView(APIView):
             
             # Calculate percentages
             bodega_data['total_items'] = bodega_total
+    def get(self, request, *args, **kwargs):
+        # 1. Verificar que estamos usando SQLite (o ajustar si es otro motor)
+        if 'sqlite3' not in settings.DATABASES['default']['ENGINE']:
+            return Response({'error': 'La función de respaldo solo está configurada para SQLite.'}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        db_path = settings.DATABASES['default']['NAME']
+        
+        # 2. Generar un nombre de archivo dinámico
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_filename = f"db_backup_{timestamp}.sqlite3"
+        
+        # 3. Asegurar que la conexión a la base de datos esté cerrada temporalmente (Necesario para copiar SQLite)
+        # Esto es crucial para asegurar una copia consistente de SQLite
+        connection.close() 
+
+        try:
+            # 4. Usar FileResponse para servir el archivo directamente
+            response = FileResponse(
+                open(db_path, 'rb'), 
+                content_type='application/octet-stream'
+            )
+            
+            # 5. Establecer el encabezado Content-Disposition (crucial para la descarga)
+            response['Content-Disposition'] = f'attachment; filename="{backup_filename}"'
+            
+            return response
+            
+        except FileNotFoundError:
+            raise Http404("Archivo de base de datos no encontrado.")
+            
+        finally:
+            # 6. Reabrir la conexión a la base de datos después de la operación
+            connection.ensure_connection()
+
+class BackupRestoreView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # 1. Obtener el archivo del request (clave 'backup_file' del frontend)
+        uploaded_file = request.FILES.get('backup_file')
+        
+        if not uploaded_file:
+            return Response({'error': 'No se encontró el archivo de respaldo.'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Configuración de rutas (igual que en BackupCreateView)
+        db_path = settings.DATABASES['default']['NAME']
+        
+        # 3. Guardar el archivo subido en una ubicación temporal
+        temp_dir = settings.BASE_DIR / 'temp_restore'
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_file_path = temp_dir / 'incoming_backup.sqlite3'
+        
+        with open(temp_file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        # 4. CRÍTICO: Cerrar la conexión a la base de datos
+        connection.close() 
+
+        try:
+            # 5. Sobrescribir el archivo de base de datos con el archivo de respaldo
+            shutil.copyfile(temp_file_path, db_path)
+            
+            # 6. Responder éxito
+            return Response({'status': 'Restauración completada exitosamente. Se recomienda recargar el sistema.'}, 
+                            status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # 7. Manejo de errores
+            return Response({'error': f'Error al restaurar la base de datos: {str(e)}'}, 
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        finally:
+            # 8. Reabrir la conexión y limpiar el archivo temporal
+            connection.ensure_connection()
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
+
+class WarehouseInventoryReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        """
+        Returns inventory data grouped by warehouse and category.
+        Shows percentage of inventory per warehouse and items by category.
+        """
+        # Define the inventory models to check
+        inventory_models = [
+            ('Manteleria', Manteleria),
+            ('Cubierto', Cubierto),
+            ('Loza', Loza),
+            ('Cristaleria', Cristaleria),
+            ('Sillas', Silla),
+            ('Mesas', Mesa),
+            ('Salas lounge', SalaLounge),
+            ('Periqueras', Periquera),
+            ('Carpas', Carpa),
+            ('Pistas y tarimas', PistaTarima),
+            ('Extras', Extra)
+        ]
+
+        # Get all warehouses
+        bodegas = Bodega.objects.all()
+        
+        # Structure to hold the report data
+        report_data = []
+        total_inventory = 0
+        
+        # Calculate total inventory across all warehouses
+        for category_name, model in inventory_models:
+            total_inventory += model.objects.aggregate(total=models.Sum('cantidad'))['total'] or 0
+        
+        # Process each warehouse
+        for bodega in bodegas:
+            bodega_data = {
+                'id': bodega.id,
+                'nombre': bodega.nombre,
+                'ubicacion': bodega.ubicacion,
+                'total_items': 0,
+                'percentage': 0,
+                'categories': []
+            }
+            
+            bodega_total = 0
+            category_details = []
+            
+            # Calculate inventory by category for this warehouse
+            for category_name, model in inventory_models:
+                category_total = model.objects.filter(bodega=bodega).aggregate(
+                    total=models.Sum('cantidad')
+                )['total'] or 0
+                
+                bodega_total += category_total
+                
+                category_details.append({
+                    'categoria': category_name,
+                    'cantidad': category_total,
+                    'percentage': 0  # Will calculate after we know bodega_total
+                })
+            
+            # Calculate percentages
+            bodega_data['total_items'] = bodega_total
             if total_inventory > 0:
                 bodega_data['percentage'] = round((bodega_total / total_inventory) * 100, 2)
             
@@ -1066,3 +1210,40 @@ class WarehouseInventoryReportView(APIView):
             'total_inventory': total_inventory,
             'warehouses': report_data
         })
+
+class HomeSectionViewSet(viewsets.ModelViewSet):
+    queryset = HomeSection.objects.all()
+    serializer_class = HomeSectionSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'name'
+
+    @action(detail=True, methods=['post'])
+    def upload_image(self, request, name=None):
+        section = self.get_object()
+        image = request.FILES.get('image')
+        caption = request.data.get('caption', '')
+        
+        if not image:
+            return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Optional: Clear existing images if you only want one per section (or specific logic)
+        # section.images.all().delete() 
+
+        HomeSectionImage.objects.create(section=section, image=image, caption=caption)
+        
+        # Return updated section data
+        serializer = self.get_serializer(section)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def delete_image(self, request, name=None):
+        image_id = request.data.get('image_id')
+        if not image_id:
+             return Response({'error': 'No image_id provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            image = HomeSectionImage.objects.get(id=image_id, section__name=name)
+            image.delete()
+            return Response({'status': 'Image deleted'})
+        except HomeSectionImage.DoesNotExist:
+            return Response({'error': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)
